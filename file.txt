@@ -1,16 +1,80 @@
-╭─── Claude Code v2.1.89 ──────────────────────────────────────────────────────╮
-│                                       │ Tips for getting started             │
-│             Welcome back!             │ Run /init to create a CLAUDE.md fil… │
-│                                       │ ──────────────────────────────────── │
-│                ▐▛███▜▌                │ Recent activity                      │
-│               ▝▜█████▛▘               │ No recent activity                   │
-│                 ▘▘ ▝▝                 │                                      │
-│                                       │                                      │
-│   qwen3.5:cloud · API Usage Billing   │                                      │
-│      ~/Desktop/expense-tracker.       │                                      │
-╰──────────────────────────────────────────────────────────────────────────────╯
+##add two links to the footer in @template/base.html:
 
-  ↑ Opus now defaults to 1M context · 5x more room, same pricing
+- "Terms ans Conditions"
+- :Privacy Policy"
+
+Both should be plain text links, no special styling needed 
+for now.
+point both to "#" as placeholder hrefs since the pages don't 
+exist yet.
+do not modify anything else on the page.
+
+git commit -m "landing: add terms and Privacy links in footer"
+
+##Create a "Terms and Conditions" pages for Spendly.
+
+1. add a new route in [@app.py](http://app.py):
+Get /terms -> renders templates/terms.html
+2. Crete templates/terms.html with generic terms and conditions 
+content appropriate for a personal expense tracking app.
+include sections like: Acceptance of terms, Use of service, User Data, Limitations of Liability, and changes to Terms .
+Extend base.html if it exists, otherwise mathc the style of landing.html.
+3. In @templates/landing.html, update the "Terms and Conditions"
+footer link href from "#" to "/terms".
+
+git commit -m "landing: add terms and Privacy links in route"
+
+Do the same as you did for the terms and conditions page,
+but for privacy policy.
+
+##Create a "Terms and Conditions" pages for Spendly.
+
+1. add a new route in [@app.py](http://app.py):
+Get /terms -> renders templates/privacy.html
+2. Crete templates/terms.html with generic privacy policy 
+content appropriate for a personal expense tracking app.
+include sections like: Data we collect, how We Use User Data, Data Storage, Third Party service, and Cintact Us.
+Match the style of terms.html.
+3. In @templates/landing.html, update the "Privacy Policy"
+footer link href from "#" to "/privacy".
+4. Make sure the apprearance  looks like the wesite's theme.
+
+##attached a screenshot
+
+Modify only the hero section in @templates/landinng.html and 
+@static/css/landing.css
+to match this image exactly. Do not touch any other part of 
+the page.
+
+git commit -m "langing: redesign hero section to match mockup"
+
+## Add a modal to @templates/landing.html that opens when the clicks
+
+"See how it works".
+
+Requirements:
+
+Clicking "See how it works" opens a modal overlay
+
+- Modal contains an embedded YouTube video (use any placeho YouTube URL
+
+for now, I will replace it later)
+
+Video should be playable inside the modal
+
+- Clicking the close button OR clicking outside the modal ca it
+
+Chat **L Edit **I
+
+- when the modal closes, the video must stop playing (not continue in background)
+
+- No page libraries or dependencies - vanilla JS only, since are not
+
+using any JS framework in this project
+
+Do not modify any other part of the page.
+
+git commit -m "landing: add youtube model on see how it works click"
 
 ● Project Structure: Spendly (Expense Tracker)
 

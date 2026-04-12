@@ -1,6 +1,19 @@
 from flask import Flask, render_template
 
+from database.db import init_db, seed_db, close_db
+
 app = Flask(__name__)
+
+# Initialize database on startup
+with app.app_context():
+    init_db()
+    seed_db()
+
+
+@app.teardown_appcontext
+def teardown_db(exception):
+    """Close database connection after each request."""
+    close_db(exception)
 
 
 # ------------------------------------------------------------------ #
