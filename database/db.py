@@ -122,3 +122,27 @@ def seed_db():
         )
 
     db.commit()
+
+
+def create_user(name: str, email: str, password: str) -> int:
+    """Create a new user with hashed password.
+
+    Args:
+        name: User's full name.
+        email: User's email address (must be unique).
+        password: Plaintext password to be hashed.
+
+    Returns:
+        int: The new user's ID.
+
+    Raises:
+        sqlite3.IntegrityError: If email already exists.
+    """
+    db = get_db()
+    password_hash = generate_password_hash(password)
+    cursor = db.execute(
+        'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
+        (name, email, password_hash)
+    )
+    db.commit()
+    return cursor.lastrowid

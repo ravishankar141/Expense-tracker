@@ -1,8 +1,11 @@
-from flask import Flask, render_template
+import sqlite3
 
-from database.db import init_db, seed_db, close_db
+from flask import Flask, abort, flash, redirect, render_template, request, url_for
+
+from database.db import init_db, seed_db, close_db, create_user
 
 app = Flask(__name__)
+app.secret_key = "dev-secret-key-change-in-production"  # TODO: Move to env var before deployment
 
 # Initialize database on startup
 with app.app_context():
@@ -25,8 +28,39 @@ def landing():
     return render_template("landing.html")
 
 
-@app.route("/register")
+@app.route("/register", methods=["GET", "POST"])
 def register():
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        # Server-side validation
+        if not name:
+            flash("Name is required", "error")
+            return render_template("register.html")
+
+        if not email:
+            flash("Email is required", "error")
+            return render_template("register.html")
+
+        if not password:
+            flash("Password is required", "error")
+            return render_template("register.html")
+
+        if password != confirm_password:
+            flash("Passwords do not match", "error")
+            return render_template("register.html")
+
+        try:
+            create_user(name, email, password)
+            flash("Account created successfully!", "success")
+            return redirect(url_for("login"))
+        except sqlite3.IntegrityError:
+            flash("Email already registered", "error")
+            return render_template("register.html")
+
     return render_template("register.html")
 
 
