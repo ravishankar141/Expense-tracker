@@ -1,8 +1,10 @@
 import sqlite3
 
-from flask import Flask, abort, flash, redirect, render_template, request, url_for
+from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
 
-from database.db import init_db, seed_db, close_db, create_user
+from werkzeug.security import check_password_hash
+
+from database.db import init_db, seed_db, close_db, create_user, get_user_by_email
 
 app = Flask(__name__)
 app.secret_key = "dev-secret-key-change-in-production"  # TODO: Move to env var before deployment
@@ -64,8 +66,31 @@ def register():
     return render_template("register.html")
 
 
-@app.route("/login")
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        password = request.form.get("password", "")
+
+        if not email:
+            flash("Email is required", "error")
+            return render_template("login.html")
+
+        if not password:
+            flash("Password is required", "error")
+            return render_template("login.html")
+
+        user = get_user_by_email(email)
+        if user is None or not check_password_hash(user['password_hash'], password):
+            flash("Invalid credentials", "error")
+            return render_template("login.html")
+
+        # TODO: session.regenerate() before setting user data (Step 0X)
+        session['user_id'] = user['id']
+        session['user_name'] = user['name']
+        flash("Logged in successfully!", "success")
+        return redirect(url_for("profile"))
+
     return render_template("login.html")
 
 
@@ -85,12 +110,14 @@ def privacy():
 
 @app.route("/logout")
 def logout():
-    return "Logout — coming in Step 3"
+    session.clear()
+    flash("Logged out successfully", "success")
+    return redirect(url_for("landing"))
 
 
 @app.route("/profile")
 def profile():
-    return "Profile page — coming in Step 4"
+    return render_template("profile.html")
 
 
 @app.route("/expenses/add")
