@@ -1,4 +1,5 @@
 import sqlite3
+from urllib.parse import urlparse
 
 from flask import Flask, abort, flash, redirect, render_template, request, session, url_for
 
@@ -68,30 +69,45 @@ def register():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    # Get the next URL from query param (for redirecting after login)
+    next_url = request.args.get("next", "")
+
     if request.method == "POST":
         email = request.form.get("email", "").strip()
         password = request.form.get("password", "")
+        next_url = request.form.get("next", "")
 
         if not email:
             flash("Email is required", "error")
-            return render_template("login.html")
+            return render_template("login.html", next=next_url)
 
         if not password:
             flash("Password is required", "error")
-            return render_template("login.html")
+            return render_template("login.html", next=next_url)
 
         user = get_user_by_email(email)
         if user is None or not check_password_hash(user['password_hash'], password):
             flash("Invalid credentials", "error")
-            return render_template("login.html")
+            return render_template("login.html", next=next_url)
 
         # TODO: session.regenerate() before setting user data (Step 0X)
         session['user_id'] = user['id']
         session['user_name'] = user['name']
         flash("Logged in successfully!", "success")
+
+        # Redirect to next URL if it's safe, otherwise go to profile
+        if next_url and _is_safe_redirect_url(next_url):
+            return redirect(next_url)
         return redirect(url_for("profile"))
 
-    return render_template("login.html")
+    return render_template("login.html", next=next_url)
+
+
+def _is_safe_redirect_url(target):
+    """Check if a redirect URL is safe (same host, not external)."""
+    parsed = urlparse(target)
+    # Only allow relative URLs (netloc empty) or same host redirects
+    return not parsed.netloc and parsed.path.startswith("/")
 
 
 @app.route("/terms")
@@ -117,7 +133,45 @@ def logout():
 
 @app.route("/profile")
 def profile():
-    return render_template("profile.html")
+    # Authentication guard - redirect to login if not authenticated
+    if not session.get("user_id"):
+        flash("Please log in to access your profile", "error")
+        return redirect(url_for("login", next=request.url))
+
+    # Hardcoded data for Step 4 (UI design phase)
+    context = {
+        "user": {
+            "name": "Demo User",
+            "email": "demo@spendly.com",
+            "member_since": "April 2025"
+        },
+        "stats": {
+            "total_spent": 575.50,
+            "transaction_count": 8,
+            "top_category": "Food"
+        },
+        "transactions": [
+            {"date": "Apr 12, 2025", "description": "Dinner", "category": "Food", "amount": 60.00},
+            {"date": "Apr 10, 2025", "description": "Groceries", "category": "Shopping", "amount": 150.00},
+            {"date": "Apr 8, 2025", "description": "Movie tickets", "category": "Entertainment", "amount": 35.00},
+            {"date": "Apr 6, 2025", "description": "Pharmacy", "category": "Health", "amount": 55.00},
+            {"date": "Apr 5, 2025", "description": "Electric bill", "category": "Bills", "amount": 85.00},
+            {"date": "Apr 3, 2025", "description": "Monthly bus pass", "category": "Transport", "amount": 120.00},
+            {"date": "Apr 1, 2025", "description": "Lunch at cafe", "category": "Food", "amount": 45.50},
+            {"date": "Apr 11, 2025", "description": "Misc items", "category": "Other", "amount": 25.00}
+        ],
+        "categories": [
+            {"name": "Food", "amount": 105.50, "percentage": 100},
+            {"name": "Transport", "amount": 120.00, "percentage": 100},
+            {"name": "Bills", "amount": 85.00, "percentage": 70},
+            {"name": "Health", "amount": 55.00, "percentage": 50},
+            {"name": "Entertainment", "amount": 35.00, "percentage": 35},
+            {"name": "Shopping", "amount": 150.00, "percentage": 100},
+            {"name": "Other", "amount": 25.00, "percentage": 25}
+        ]
+    }
+
+    return render_template("profile.html", **context)
 
 
 @app.route("/expenses/add")

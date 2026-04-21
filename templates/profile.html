@@ -2,11 +2,109 @@
 
 {% block title %}Profile — Spendly{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
 {% block content %}
-<section class="auth-section">
-    <div class="auth-container">
-        <h1>Welcome, {{ session.get('user_name') }}!</h1>
-        <p>Profile page — coming in Step 4</p>
+<section class="profile-section">
+    {# User Info Card #}
+    <div class="profile-header">
+        <div class="user-card">
+            <div class="user-avatar">{{ user.name[0]|upper }}</div>
+            <div class="user-info">
+                <h1>{{ user.name }}</h1>
+                <p class="user-email">{{ user.email }}</p>
+                <p class="user-meta">Member since {{ user.member_since }}</p>
+            </div>
+        </div>
+    </div>
+
+    {# Summary Stats #}
+    <div class="stats-grid">
+        <div class="stat-card">
+            <p class="stat-card-label">Total Spent</p>
+            <p class="stat-card-value">₹{{ "%.2f"|format(stats.total_spent) }}</p>
+            <p class="stat-card-subtext">All time</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-card-label">Transactions</p>
+            <p class="stat-card-value">{{ stats.transaction_count }}</p>
+            <p class="stat-card-subtext">Recorded</p>
+        </div>
+        <div class="stat-card">
+            <p class="stat-card-label">Top Category</p>
+            <p class="stat-card-value">{{ stats.top_category }}</p>
+            <p class="stat-card-subtext">Most spent</p>
+        </div>
+    </div>
+
+    {# Main Content: Transactions + Categories #}
+    <div class="profile-content">
+        {# Transaction History #}
+        <div class="section-card">
+            <h2>Recent Transactions</h2>
+            {% if transactions %}
+            <table class="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Category</th>
+                        <th style="text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td class="transaction-date">{{ transaction.date }}</td>
+                        <td class="transaction-description">{{ transaction.description }}</td>
+                        <td>
+                            <span class="category-badge badge-{{ transaction.category|lower }}">
+                                {{ transaction.category }}
+                            </span>
+                        </td>
+                        <td class="transaction-amount">₹{{ "%.2f"|format(transaction.amount) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty-state">
+                <p class="empty-state-text">No transactions yet.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        {# Category Breakdown #}
+        <div class="section-card">
+            <h2>Spending by Category</h2>
+            {% if categories %}
+            <div class="category-list">
+                {% for category in categories %}
+                <div class="category-row">
+                    <div class="category-header">
+                        <span class="category-name">{{ category.name }}</span>
+                        <span class="category-amount">₹{{ "%.2f"|format(category.amount) }}</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill fill-{{ category.name|lower }}" style="width: {{ category.percentage }}%;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <p class="empty-state-text">No spending data yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Add Expense CTA #}
+    <div class="profile-cta">
+        <p class="profile-cta-text">Track your next expense</p>
+        <a href="{{ url_for('add_expense') }}" class="btn-primary">Add Expense</a>
     </div>
 </section>
 {% endblock %}
