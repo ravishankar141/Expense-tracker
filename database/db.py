@@ -146,3 +146,21 @@ def create_user(name: str, email: str, password: str) -> int:
     )
     db.commit()
     return cursor.lastrowid
+
+
+def get_user_by_email(email: str) -> dict | None:
+    """Get user by email address.
+
+    Args:
+        email: User's email address to look up.
+
+    Returns:
+        dict: User record (sqlite3.Row) with id, name, email, password_hash.
+        None: If no user found with given email.
+    """
+    db = get_db()
+    user = db.execute(
+        'SELECT id, name, email, password_hash FROM users WHERE email = ?',
+        (email,)
+    ).fetchone()
+    return user
