@@ -6,6 +6,7 @@ from flask import Flask, abort, flash, redirect, render_template, request, sessi
 from werkzeug.security import check_password_hash
 
 from database.db import init_db, seed_db, close_db, create_user, get_user_by_email
+from database.queries import get_user_by_id, get_summary_stats, get_recent_transactions, get_category_breakdown
 
 app = Flask(__name__)
 app.secret_key = "dev-secret-key-change-in-production"  # TODO: Move to env var before deployment
@@ -138,40 +139,21 @@ def profile():
         flash("Please log in to access your profile", "error")
         return redirect(url_for("login", next=request.url))
 
-    # Hardcoded data for Step 4 (UI design phase)
-    context = {
-        "user": {
-            "name": "Demo User",
-            "email": "demo@spendly.com",
-            "member_since": "April 2025"
-        },
-        "stats": {
-            "total_spent": 575.50,
-            "transaction_count": 8,
-            "top_category": "Food"
-        },
-        "transactions": [
-            {"date": "Apr 12, 2025", "description": "Dinner", "category": "Food", "amount": 60.00},
-            {"date": "Apr 10, 2025", "description": "Groceries", "category": "Shopping", "amount": 150.00},
-            {"date": "Apr 8, 2025", "description": "Movie tickets", "category": "Entertainment", "amount": 35.00},
-            {"date": "Apr 6, 2025", "description": "Pharmacy", "category": "Health", "amount": 55.00},
-            {"date": "Apr 5, 2025", "description": "Electric bill", "category": "Bills", "amount": 85.00},
-            {"date": "Apr 3, 2025", "description": "Monthly bus pass", "category": "Transport", "amount": 120.00},
-            {"date": "Apr 1, 2025", "description": "Lunch at cafe", "category": "Food", "amount": 45.50},
-            {"date": "Apr 11, 2025", "description": "Misc items", "category": "Other", "amount": 25.00}
-        ],
-        "categories": [
-            {"name": "Food", "amount": 105.50, "percentage": 100},
-            {"name": "Transport", "amount": 120.00, "percentage": 100},
-            {"name": "Bills", "amount": 85.00, "percentage": 70},
-            {"name": "Health", "amount": 55.00, "percentage": 50},
-            {"name": "Entertainment", "amount": 35.00, "percentage": 35},
-            {"name": "Shopping", "amount": 150.00, "percentage": 100},
-            {"name": "Other", "amount": 25.00, "percentage": 25}
-        ]
-    }
+    user_id = session["user_id"]
 
-    return render_template("profile.html", **context)
+    # Fetch real data from database
+    user = get_user_by_id(user_id)
+    stats = get_summary_stats(user_id)
+    transactions = get_recent_transactions(user_id)
+    categories = get_category_breakdown(user_id)
+
+    return render_template(
+        "profile.html",
+        user=user,
+        stats=stats,
+        transactions=transactions,
+        categories=categories
+    )
 
 
 @app.route("/expenses/add")
