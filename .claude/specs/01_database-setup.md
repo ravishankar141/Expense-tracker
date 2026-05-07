@@ -138,6 +138,7 @@ Use exactly these values:
 
 ## 11. Rules for Implementation
 
+
 - No ORMs (no SQLAlchemy)
 - Use **parameterized queries only**
 - Never use string formatting in SQL

@@ -51,7 +51,7 @@ pytest
 
 --- 
 # Code style
-
+git
 - Python: PEP 8, snake_case for all variables and functions
 - Templates: Jinja2 with 'url_for()' for every internal link never -> hardcode URLS
 
@@ -119,7 +119,7 @@ pytest -s
 - **Never install new packages** mid-feature without flagging it keep requirements.txt in sync
 - **Never use JS frameworks** the frontend is intentionally vanilla
 
-**'database/db.py' is implemented** - contains get_db(), init_db(), seed_db(), close_db()
+**'database/db.py' is currently empty** - do not assume helpers exist until the step that implements them
 
 **FK enforcement is manual** SQLite foreign keys are off by default;
 'get_db()' must run 'PRAGMA foreign_keys ON' on every connection 
