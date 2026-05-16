@@ -21,17 +21,17 @@
               {% endif %}
             {% endwith %}
 
-            <form method="POST" action="{{ url_for('login') }}">!
+            <form method="POST" action="{{ url_for('login') }}">
                 <div class="form-group">
                     <label for="email">Email address</label>
                     <input type="email" id="email" name="email"
-                           class="form-input" placeholder="ravimaurya7145@gmail.com"
+                           class="form-input" placeholder="enter your email"
                            required autofocus>
                 </div>
                 <div class="form-group">
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password"
-                           class="form-input" placeholder="Your password"
+                           class="form-input" placeholder="enter your password"
                            required>
                 </div>
                 <button type="submit" class="btn-submit">Sign in</button>
